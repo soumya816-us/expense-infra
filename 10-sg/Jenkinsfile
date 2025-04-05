@@ -52,6 +52,15 @@ pipeline {
             }
 
         }
+
+        stage ('Destroy VPC') {
+            when {
+                expression { params.ACTION == 'Destroy' }
+            }
+            steps{
+                build job: '00-vpc', parameters: [string(name: 'ACTION', value: "Destroy")], wait: false
+            }
+        }
        
     }   
  
