@@ -13,7 +13,7 @@ pipeline {
 
     parameters {
         
-        choice(name: 'ACTION', choices: ['Apply', 'Destroy'], description: 'Select something')
+        choice(name: 'ACTION', choices: ['Apply', 'Destroy'], description: 'Select Action')
 
     }
     stages {
@@ -21,7 +21,7 @@ pipeline {
             steps {
                 withAWS(region: 'us-east-1', credentials: 'aws-creds'){
                     sh """
-                        cd 00-vpc
+                        cd 40-eks
                         terraform init -reconfigure
                         terraform plan -out=tfplan
                     """
@@ -38,7 +38,7 @@ pipeline {
             steps {
                 withAWS(region: 'us-east-1', credentials: 'aws-creds') {
                     sh """
-                        cd 00-vpc
+                        cd 40-eks
                         if [ ${params.ACTION} == 'Apply' ]
                         then
                             terraform apply -auto-approve tfplan
@@ -50,19 +50,9 @@ pipeline {
             
                 }
             }
-        
-        }
 
-        stage ('Trigger SG') {
-            when {
-                expression { params.ACTION == 'Apply' }
-            }
-            steps{
-                    build job: '10-sg', parameters: [string(name: 'ACTION', value: "Apply")], wait: false
-            }            
         }
-
-     
+       
     }   
  
     post {
